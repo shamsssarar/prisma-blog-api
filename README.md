@@ -5,17 +5,23 @@ A robust backend API designed for an industrial blogging platform. This project 
 ## 🚀 Tech Stack
 
 * **Runtime:** Node.js
-* **Framework:** Express.js (or Next.js API Routes - *update this based on your code*)
+* **Framework:** Express.js 
 * **ORM:** Prisma
 * **Database:** PostgreSQL (e.g., NeonDB)
-* **Language:** JavaScript / TypeScript
+* **Language:** TypeScript
 
 ## ✨ Features
 
-* **User Management:** Register and login functionality.
-* **CRUD Operations:** Create, Read, Update, and Delete industrial blog posts.
-* **Filtering:** Filter posts by category or industry sector.
-* **Database Management:** Type-safe database queries with Prisma.
+* **User Management:** Secure authentication system (Register/Login).
+* **Industrial Blog Posts:** Full CRUD support for industry-specific articles.
+* **Advanced Filtering & Sorting:**
+    * Filter by industry sector or category.
+    * Sort by date (Newest/Oldest) or popularity.
+* **Optimized Pagination:** Server-side pagination to handle large datasets efficiently.
+* **Interactive Comment System:**
+    * **Multi-Comment Support:** Handle unlimited comments per blog post.
+    * **Nested Replies:** Recursive threaded comments (Reddit-style) allowing users to reply directly to other comments.
+* **Database Management:** Type-safe database queries using **Prisma ORM**.
 
 ---
 
@@ -55,4 +61,28 @@ npm run dev
 
 # Production mode
 npm start
+```
+
+## 🗄️ Database Model Highlight
+
+To handle **Nested Replies**, the Comment model uses a self-relation in Prisma:
+
+```prisma
+model Comment {
+  id        Int           @id @default(autoincrement())
+  postId    Int
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  ParentId  Int?
+  parent    Comment?      @relation("CommentToReplies", fields: [ParentId], references: [id], onDelete: Cascade)
+  replies   Comment[]     @relation("CommentToReplies")
+  status    CommentStatus @default(APPROVED)
+  content   String        @db.Text
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
+}
 ```
